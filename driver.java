@@ -547,24 +547,24 @@ public class driver
     String nucleotides2 = readFastaFile(FASTAfile2);
 
     parseGFFFile(GFFfile, sequence, nucleotides);
-    parseGFFFile(GFFfile, sequence2, nucleotides2);
+    parseGFFFile(GFFfile2, sequence2, nucleotides2);
 
     int offset = Aligner.getAlignmentIndex(nucleotides, nucleotides2);
     System.out.println(offset);
 
-//    if (offset == -1)
-//    {
-//      String finalSequence = Aligner.mergeContigs(nucleotides, nucleotides2,
-//          offset);
-//      writeFasta(finalSequence);
-//      writeGFF(sequence);
-//    }
-//    else
-//    {
-//      findConflicts(sequence.getExonList(), sequence2.getExonList(),
-//          nucleotides.length() - offset, offset);
-//    }
-//
+    if (offset == -1)
+    {
+      String finalSequence = Aligner.mergeContigs(nucleotides, nucleotides2,
+          offset);
+      writeFasta(finalSequence);
+      writeGFF(sequence);
+    }
+    else
+    {
+      findConflicts(sequence.getExonList(), sequence2.getExonList(),
+          offset, nucleotides.length() - offset);
+    }
+
     String returnString = new String();
 
     return returnString;
@@ -588,27 +588,50 @@ public class driver
       ArrayList<DNARegion> after, int bOffset, int aOffset)
   {
     ArrayList<ConflictingExon> returnArr = new ArrayList<ConflictingExon>();
+    ArrayList<DNARegion> before2 = (ArrayList<DNARegion>) before.clone();
+    ArrayList<DNARegion> after2 = (ArrayList<DNARegion>) after.clone();
     for (DNARegion exon : before)
     {
-      if (exon.end >= bOffset)
+      if (exon.end < bOffset)
       {
-        before.remove(exon);
+        if(before2.remove(exon)==false)
+          System.out.println("null");
       }
     }
+
     for (DNARegion exon : after)
     {
-      if (exon.start <= aOffset)
+      if (exon.start > aOffset)
       {
-        after.remove(exon);
+        after2.remove(exon);
       }
     }
-    for (DNARegion bexon : before)
+//    for(DNARegion exon : after)
+//    {
+//      System.out.println(exon.start);
+//    }
+    ArrayList<DNARegion> before3 = (ArrayList<DNARegion>) before2.clone();
+    ArrayList<DNARegion> after3 = (ArrayList<DNARegion>) after2.clone();
+    for (DNARegion exon1 : before2)
     {
-      for (DNARegion aexon : after)
+      for (DNARegion exon2 : after2)
       {
-
+//        System.out.println(exon1.start + " " + (exon2.start + aOffset) + " " + Offset);
+        if((exon1.start == (exon2.start + bOffset)) && (exon1.end == (exon2.end + bOffset)))
+        {
+          System.out.println("matched");
+          before3.remove(exon1);
+          after3.remove(exon2);
+        }
+        
       }
     }
+    for (DNARegion exon1 : before3)
+    {
+      System.out.println(exon1.start + " " + exon1.end);
+    }
+    System.out.println(before3);
+    System.out.println(after3);
 
     return returnArr;
   }
