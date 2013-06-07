@@ -307,6 +307,7 @@ public class InputDialog extends JDialog
         else
         {
           String fileSubbed = null;
+          int numFiles = 0;
           File fastaDir = new File(mFile.getText());
           File gffDir = new File(mFile2.getText());
 
@@ -320,9 +321,10 @@ public class InputDialog extends JDialog
             File[] fileList = fastaDir.listFiles();
             for(int i = 0; i < fileList.length; i++)
             {//Add only .fna file names to listi
-              
+              System.out.println(fileList[i].getName());
               if(fileList[i].getName().endsWith(".fna"))
               {
+                numFiles++;
                 if(fileSubbed == null)
                 {
                   fileSubbed = fileList[i].getName();
@@ -333,8 +335,7 @@ public class InputDialog extends JDialog
                     fileSubbed = fileSubbed.substring(0, fileSubbed.length()-1);
                     endChar = fileSubbed.charAt(fileSubbed.length() - 1);
                   }
-                  System.out.println(fileSubbed);
-                  
+                  //System.out.println(fileSubbed);
                 }
               }
                 fastaList.add(fileList[i].getName());
@@ -346,24 +347,24 @@ public class InputDialog extends JDialog
               "Invalid File", JOptionPane.ERROR_MESSAGE);
             return;
           }
-          Iterator<String> it = fastaList.iterator();
           mDisplayArea.setText("");
-          while(it.hasNext())
+          System.out.println(numFiles);
+          for(int i = 1; i <= numFiles; i++)
           {
-            String fastaPath, gffPath;
-            String fastaName = it.next();
-            if(fastaDir.isDirectory())
+            String fastaPath = fastaDir.getPath() +'/' + fileSubbed + i + ".0.fna";
+            String gffPath = gffDir.getPath() + '/'+ fileSubbed + i + ".0.gff";
+            //System.out.println(numFiles + " " + fastaPath);
+            if(! new File(fastaPath).exists())
             {
-              fastaPath = fastaDir + "/" + fastaName;
-              gffPath = gffDir + "/" + fastaName.substring(0,fastaName.length() - 4) + ".gff";
+              //System.out.println("Missing " + numFiles);
+              numFiles++;
+              continue;
             }
-            else
-            {
-              fastaPath = mFile.getText();
-              gffPath = mFile2.getText();
-            }
-            String sequence = FileReader.readFastaFile(fastaPath);
-            mDisplayArea.append(fastaPath + "\n");            
+            //TODO TODO TODO!
+
+
+
+            //mDisplayArea.append(fastaPath + "\n");            
           }
         
         }
