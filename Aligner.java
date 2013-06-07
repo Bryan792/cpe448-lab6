@@ -16,8 +16,8 @@ public class Aligner {
    }
 
    // Returns merged contig string
-   public static String mergeContigs(String s1, String s2) {
-      int s = getAlignmentIndex(s1, s2);
+   public static String mergeContigs(String s1, String s2, int s) {
+//      int s = getAlignmentIndex(s1, s2);
 
       return (s == -1) ? "" : s1.substring(0, s + 1) + s2;
    }
