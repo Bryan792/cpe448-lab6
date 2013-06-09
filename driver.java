@@ -30,9 +30,10 @@ class GFFEntry
   Integer end;
   Boolean positive;
   String sequence;
+  String GFFString;
 
   public GFFEntry(String geneName, String isoName, String type, String start,
-      String end, String positive, String sequence)
+      String end, String positive, String sequence, String GFFString)
   {
     this.geneName = geneName;
     this.isoName = isoName;
@@ -49,6 +50,7 @@ class GFFEntry
     }
     this.positive = (positive.equals("+"));
     this.sequence = sequence;
+    this.GFFString = GFFString;
   }
 }
 
@@ -62,19 +64,21 @@ class DNARegion implements Comparable
   public int end;
   public int size;
   public String exonString;
+  public String GFFString;
 
-  public DNARegion(int start, int end, String sequence)
+  public DNARegion(int start, int end, String sequence, String GFFString)
   {
     this.start = start;
     this.end = end;
     size = end - start + 1;
     calculate(sequence);
+    this.GFFString = GFFString;
   }
 
   // Calculates exonString information
   private void calculate(String sequence)
   {
-//    exonString = sequence.substring(start - 1, end);// TODO
+    // exonString = sequence.substring(start - 1, end);// TODO
   }
 
   // Not used in current implementation
@@ -91,6 +95,7 @@ class Isoform
   private ArrayList<DNARegion> exonList = new ArrayList<DNARegion>();
   private String name;
   private int mRNAstart;
+  public String GFFString;
 
   public ArrayList<DNARegion> getExonList()
   {
@@ -110,24 +115,27 @@ class Isoform
   private int mRNAend;
   private boolean positive;
 
-  public Isoform(String name, int mRNAstart, int mRNAend)
+  public Isoform(int mRNAstart, int mRNAend, boolean positive, String GFFString)
   {
-    this.name = name;
+    // this.name = name;
     this.mRNAstart = mRNAstart;
     this.mRNAend = mRNAend;
-
-  }
-
-  public Isoform(boolean positive)
-  {
+    this.GFFString = GFFString;
     this.positive = positive;
+
   }
+
+  // public Isoform(boolean positive, String GFFString)
+  // {
+  // this.positive = positive;
+  // this.GFFString = GFFString;
+  // }
 
   public void add(GFFEntry entry)
   {
     if (entry.type.equals("CDS"))
     {
-      addExon(entry.start, entry.end, entry.sequence);
+      addExon(entry.start, entry.end, entry.sequence, entry.GFFString);
     }
     else
     {
@@ -137,9 +145,10 @@ class Isoform
   }
 
   // Assume + direction
-  public void addExon(int CDSstart, int CDSend, String sequence)
+  public void addExon(int CDSstart, int CDSend, String sequence,
+      String GFFString)
   {
-    exonList.add(new DNARegion(CDSstart, CDSend, sequence));
+    exonList.add(new DNARegion(CDSstart, CDSend, sequence, GFFString));
   }
 
   public DNARegion getExon(int index)
@@ -208,6 +217,23 @@ class Isoform
       isoformString = new StringBuilder(
           NucTranslator.reverseComplement(isoformString)).reverse().toString();
     return NucTranslator.translate(isoformString);
+  }
+
+  public StringBuilder writeGFF(int offset)
+  {
+    StringBuilder sb = new StringBuilder();
+    if (offset > 0 && mRNAend < offset)
+     return sb;
+    sb.append(GFFString.replace("" + mRNAstart, "" + (mRNAstart + offset))
+        .replace("" + mRNAend, "" + (mRNAend + offset)) + "\n");
+    for (DNARegion exon : exonList)
+    {
+      sb.append(exon.GFFString.replace("" + exon.start,
+          "" + (exon.start + offset)).replace("" + exon.end,
+          "" + (exon.end + offset))
+          + "\n");
+    }
+    return sb;
   }
 }
 
@@ -281,7 +307,8 @@ class Gene
     }
     else
     {
-      Isoform isoform = new Isoform(entry.positive);
+      Isoform isoform = new Isoform(entry.start, entry.end, entry.positive,
+          entry.GFFString);
       isoform.add(entry);
       isoList.put(entry.isoName, isoform);
     }
@@ -352,6 +379,19 @@ class Gene
     {
       totalCDS += maxExons.get(i);
     }
+  }
+
+  public StringBuilder writeGFF(int offset)
+  {
+    StringBuilder sb = new StringBuilder();
+    Iterator<Entry<String, Isoform>> it = isoList.entrySet().iterator();
+    while (it.hasNext())
+    {
+      Entry<String, Isoform> entry = it.next();
+      Isoform isoform = entry.getValue();
+      sb.append(isoform.writeGFF(offset));
+    }
+    return sb;
   }
 
 }
@@ -532,6 +572,19 @@ class DNASequence
   {
     return totalNucPerGene;
   }
+
+  public StringBuilder writeGFF(int offset)
+  {
+    StringBuilder sb = new StringBuilder();
+    Iterator<Entry<String, Gene>> it = geneList.entrySet().iterator();
+    while (it.hasNext())
+    {
+      Entry<String, Gene> entry = it.next();
+      Gene gene = (Gene) entry.getValue();
+      sb.append(gene.writeGFF(offset));
+    }
+    return sb;
+  }
 }
 
 public class driver
@@ -551,18 +604,25 @@ public class driver
 
     int offset = Aligner.getAlignmentIndex(nucleotides, nucleotides2);
     System.out.println(offset);
+    String finalSequence = Aligner.mergeContigs(nucleotides, nucleotides2,
+        offset);
+    writeFasta(finalSequence);
+
+    // writeGFF(sequence);
 
     if (offset == -1)
     {
-      String finalSequence = Aligner.mergeContigs(nucleotides, nucleotides2,
-          offset);
-      writeFasta(finalSequence);
-      writeGFF(sequence);
+      // String finalSequence = Aligner.mergeContigs(nucleotides, nucleotides2,
+      // offset);
+      // writeFasta(finalSequence);
+      // writeGFF(sequence);
     }
     else
     {
-      findConflicts(sequence.getExonList(), sequence2.getExonList(),
-          offset, nucleotides.length() - offset);
+      findConflicts(sequence.getExonList(), sequence2.getExonList(), offset,
+          nucleotides.length() - offset);
+      writeGFF(printGFF(sequence, 0).append(printGFF(sequence2, offset)));
+      // System.out.println();
     }
 
     String returnString = new String();
@@ -594,7 +654,7 @@ public class driver
     {
       if (exon.end < bOffset)
       {
-        if(before2.remove(exon)==false)
+        if (before2.remove(exon) == false)
           System.out.println("null");
       }
     }
@@ -606,32 +666,38 @@ public class driver
         after2.remove(exon);
       }
     }
-//    for(DNARegion exon : after)
-//    {
-//      System.out.println(exon.start);
-//    }
+    // for(DNARegion exon : after)
+    // {
+    // System.out.println(exon.start);
+    // }
     ArrayList<DNARegion> before3 = (ArrayList<DNARegion>) before2.clone();
     ArrayList<DNARegion> after3 = (ArrayList<DNARegion>) after2.clone();
     for (DNARegion exon1 : before2)
     {
       for (DNARegion exon2 : after2)
       {
-//        System.out.println(exon1.start + " " + (exon2.start + aOffset) + " " + Offset);
-        if((exon1.start == (exon2.start + bOffset)) && (exon1.end == (exon2.end + bOffset)))
+        // System.out.println(exon1.start + " " + (exon2.start + aOffset) + " "
+        // + Offset);
+        if ((exon1.start == (exon2.start + bOffset))
+            && (exon1.end == (exon2.end + bOffset)))
         {
-          System.out.println("matched");
+          // System.out.println("matched");
           before3.remove(exon1);
           after3.remove(exon2);
         }
-        
+
       }
     }
+    System.out.println(before3);
     for (DNARegion exon1 : before3)
     {
       System.out.println(exon1.start + " " + exon1.end);
     }
-    System.out.println(before3);
     System.out.println(after3);
+    for (DNARegion exon1 : after3)
+    {
+      System.out.println(exon1.start + " " + exon1.end);
+    }
 
     return returnArr;
   }
@@ -639,7 +705,7 @@ public class driver
   public void writeFasta(String finalSequence)
   {
     Path path = FileSystems.getDefault().getPath(".",
-        "output" + (counter++) + ".fna");
+        "output" + (counter) + ".fna");
     try
     {
       Files.write(path, ("\n" + finalSequence).getBytes(),
@@ -652,9 +718,26 @@ public class driver
     }
   }
 
-  public void writeGFF(DNASequence sequence)
+  public StringBuilder printGFF(DNASequence sequence, int offset)
   {
+    return sequence.writeGFF(offset);
+  }
 
+  public void writeGFF(StringBuilder sb)
+  {
+    Path path = FileSystems.getDefault().getPath(".",
+        "output" + (counter) + ".gff");
+    try
+    {
+      Files.write(path, sb.toString().getBytes(), StandardOpenOption.CREATE);
+    }
+    catch (IOException e)
+    {
+      // TODO Auto-generated catch block
+      e.printStackTrace();
+    }
+
+    // System.out.print(sequence.writeGFF(offset).toString());
   }
 
   public void parseGFFFile(String path, DNASequence sequence, String seq)
@@ -681,7 +764,7 @@ public class driver
           // returnString = returnString.concat("" + splitLine[0]);
 
           sequence.add(new GFFEntry(splitLine[9], splitLine[11], splitLine[2],
-              splitLine[3], splitLine[4], splitLine[6], seq));
+              splitLine[3], splitLine[4], splitLine[6], seq, currLine));
         }
 
       }
@@ -728,10 +811,13 @@ public class driver
   public static void main(String[] args)
   {
     driver d = new driver();
-    d.drive("derecta_3Lcontrol_fosmid2.0.fna",
-        "derecta_3Lcontrol_fosmid2.0.gff",
-        "derecta_3Lcontrol_fosmid3.0.fna",
-        "derecta_3Lcontrol_fosmid3.0.gff");
+
+    String file1 = "derecta_3Lcontrol_fosmid1.0";
+    String file2 = "derecta_3Lcontrol_fosmid2.0";
+
+    d.drive("derecta_3Lcontrol_fasta/" + file1 + ".fna",
+        "derecta_3Lcontrol_gff/" + file1 + ".gff", "derecta_3Lcontrol_fasta/"
+            + file2 + ".fna", "derecta_3Lcontrol_gff/" + file2 + ".gff");
 
   }
 }
