@@ -1,29 +1,29 @@
 public class Overlap {
 
    // returns true two substrings overlap 
-   public static int isOverlapping(int aStart, int aEnd, int bStart, int bEnd) {
+   public static boolean isOverlapping(int aStart, int aEnd, int bStart, int bEnd) {
       // return 0 if they are matching overlapping
       if(aStart == bStart && aEnd == bEnd) {
-         return 0;
+         return false;
       }
 
       // return 1 if they align on one end
       if(aStart == bStart || aEnd == bEnd) {
-         return 1;
+         return true;
       }
       if(aStart == bEnd || aEnd == bStart) {
-         return 1;
+         return true;
       }
       if(aStart < bStart) {
          if(bStart < aEnd) {
-            return 1;
+            return true;
          }
-         else return 0;
+         else return false;
       }
       else if (aStart < bEnd) {
-         return 1;
+         return true;
       }
-      else return 0;
+      else return false;
 
    }
 
