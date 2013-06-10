@@ -58,7 +58,7 @@ public class InputDialog2 extends JDialog
   private JTextArea mDisplayArea;
   private JCheckBox mUseSlidingWindow;
   private JComboBox mOptsBox, mTypesBox;
-  private boolean firstPass = false;
+  private boolean firstPass = true;
   public InputDialog2()
   {
     initialize();
