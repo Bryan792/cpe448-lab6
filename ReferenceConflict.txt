@@ -1,0 +1,36 @@
+/Path
+fosmid1	.	CDS	3735	6063	.	-	.	gene_id "CG7158"; transcript_id "CG7158-RA";
+SEQUENCE
+fosmid1	.	CDS	3735	6063	.	-	.	gene_id "CG7158"; transcript_id "CG7158-RA";
+SEQUENCE
+
+Reference Sequence: 
+
+----------------------
+/Path
+fosmid1	.	CDS	3735	6063	.	-	.	gene_id "CG7158"; transcript_id "CG7158-RA";
+SEQUENCE
+fosmid1	.	CDS	3735	6063	.	-	.	gene_id "CG7158"; transcript_id "CG7158-RA";
+SEQUENCE
+
+Reference Sequence: 
+
+----------------------
+/Path
+fosmid1	.	CDS	3735	6063	.	-	.	gene_id "CG7158"; transcript_id "CG7158-RA";
+SEQUENCE
+fosmid1	.	CDS	3735	6063	.	-	.	gene_id "CG7158"; transcript_id "CG7158-RA";
+SEQUENCE
+
+Reference Sequence: 
+
+----------------------
+/Path
+fosmid1	.	CDS	3735	6063	.	-	.	gene_id "CG7158"; transcript_id "CG7158-RA";
+SEQUENCE
+fosmid1	.	CDS	3735	6063	.	-	.	gene_id "CG7158"; transcript_id "CG7158-RA";
+SEQUENCE
+
+Reference Sequence: 
+
+----------------------
