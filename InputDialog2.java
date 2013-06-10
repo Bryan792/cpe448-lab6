@@ -37,6 +37,7 @@ import java.io.File;
 import java.io.FileWriter;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Arrays;
 import java.util.Scanner;
@@ -300,12 +301,13 @@ public class InputDialog2 extends JDialog
           }
           String[] lines = mDisplayArea.getText().split(System.getProperty("line.separator"));
           lines = Arrays.copyOfRange(lines, 2, lines.length);
-          ArrayList<String> parsedConflicts = ConflictParser.parse(lines);
-          mDisplayArea.setText("");
-          for(String s: parsedConflicts)
-          {
-            mDisplayArea.append(s + '\n');
-          }
+          HashMap<String, ArrayList<String>> parsedConflicts = ConflictParser.parse(lines);
+          Driver.deleteLinesFromFile(parsedConflicts);
+          mDisplayArea.setText("done");
+//          for(String s: parsedConflicts)
+//          {
+//            mDisplayArea.append(s + '\n');
+//          }
         }
     });
     return resolveButton;

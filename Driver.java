@@ -3,20 +3,26 @@
 
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map.Entry;
 import java.util.Scanner;
 import java.util.Collections;
 import java.util.ArrayList;
 
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.io.FileNotFoundException;
+import java.nio.charset.Charset;
 import java.nio.file.FileSystems;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
+
+import com.sun.org.apache.xml.internal.serialize.LineSeparator;
 
 /*
  * Creates an Class for each line entry in GFF file
@@ -606,7 +612,7 @@ public class Driver
   public ArrayList<String> drive(String FASTAfile, String GFFfile,
       String FASTAfile2, String GFFfile2)
   {
-    // /home/bryan/Projects/cpe/cpe448/cpe448-lab6/derecta_3Lcontrol_fasta/home/bryan/Projects/cpe/cpe448/cpe448-lab6/derecta_3Lcontrol_fasta
+    // /home/bryan/Projects/cpe/cpe448/cpe448-lab6/derecta_3Lcontrol_fasta
     ArrayList<String> returnOutput = new ArrayList<String>(2);
     DNASequence sequence = new DNASequence();
     DNASequence sequence2 = new DNASequence();
@@ -679,8 +685,9 @@ public class Driver
       if (conflicts.isEmpty())
         returnOutput.add(1, "");
       else
-        returnOutput.add(1, "----------------\n" + output.replace(".fna", "")
-            + "\n" + conflicts);
+        returnOutput.add(1,
+            "----------------\n/" + output.replace(".fna", ".gff") + "\n"
+                + conflicts);
       // /home/bryan/Projects/cpe/cpe448/cpe448-lab6/derecta_3Lcontrol_fasta
     }
     return returnOutput;
@@ -904,12 +911,69 @@ public class Driver
   {
     Driver d = new Driver();
 
-    String file1 = "derecta_3Lcontrol_fosmid2.0";
-    String file2 = "derecta_3Lcontrol_fosmid3.0";
+    String file1 = "derecta_3Lcontrol_fosmid1.0";
+    String file2 = "derecta_3Lcontrol_fosmid2.0";
 
     d.drive("derecta_3Lcontrol_fasta/" + file1 + ".fna",
         "derecta_3Lcontrol_gff/" + file1 + ".gff", "derecta_3Lcontrol_fasta/"
             + file2 + ".fna", "derecta_3Lcontrol_gff/" + file2 + ".gff");
+
+  }
+
+  public static void deleteLinesFromFile(
+      HashMap<String, ArrayList<String>> input)
+  {
+    // int counter = 0;
+    Iterator<Entry<String, ArrayList<String>>> it = input.entrySet().iterator();
+    while (it.hasNext())
+    {
+
+      Entry<String, ArrayList<String>> entry = it.next();
+      ArrayList<String> deleteMe = entry.getValue();
+      Path path = FileSystems.getDefault().getPath(".", entry.getKey());
+      System.out.println(entry.getKey());
+      List<String> lines = new ArrayList<String>();
+      try
+      {
+        lines = Files.readAllLines(path, Charset.defaultCharset());
+      }
+      catch (IOException e)
+      {
+        // TODO Auto-generated catch block
+        e.printStackTrace();
+      }
+      for (String string : deleteMe)
+      {
+        lines.remove(string);
+      }
+      BufferedWriter writer = null;
+      try
+      {
+        writer = Files.newBufferedWriter(path,
+            Charset.defaultCharset(), StandardOpenOption.TRUNCATE_EXISTING);
+      }
+      catch (IOException e1)
+      {
+        // TODO Auto-generated catch block
+        e1.printStackTrace();
+      }
+      for (String line : lines)
+      {
+        line+="\n";
+        // write the line
+        try
+        {
+
+          writer.write(line, 0, line.length());
+
+        }
+        catch (IOException e)
+        {
+          // TODO Auto-generated catch block
+          e.printStackTrace();
+        }
+      }
+    }
 
   }
 }
