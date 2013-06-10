@@ -38,8 +38,9 @@ import java.io.FileWriter;
 
 import java.util.ArrayList;
 import java.util.Iterator;
+
 @SuppressWarnings("serial")
-public class InputDialog extends JDialog
+public class InputDialog2 extends JDialog
 {
   /*
    * CONSTANTS
@@ -56,7 +57,7 @@ public class InputDialog extends JDialog
   private JCheckBox mUseSlidingWindow;
   private JComboBox mOptsBox, mTypesBox;
 
-  public InputDialog()
+  public InputDialog2()
   {
     initialize();
   }
@@ -91,14 +92,13 @@ public class InputDialog extends JDialog
     mShiftIncr = new JTextField(20);
 
     JPanel fastaFileField = prepareFileField(mFile, "Select Fasta: ");
-    JPanel gffFileField = prepareFileField(mFile2,  "Select GFF:    ");
+    JPanel gffFileField = prepareFileField(mFile2, "Select GFF:    ");
 
     JPanel posField = prepareParamControls(mStartPos, mEndPos, mWinSize,
         mShiftIncr, mUseSlidingWindow);
 
     getContentPane().add(fastaFileField);
     mPane.add(gffFileField);
-
 
     // mPane.add(mDisplayArea);
     JScrollPane scrollDisplay = new JScrollPane(mDisplayArea);
@@ -118,10 +118,11 @@ public class InputDialog extends JDialog
       {
         try
         {
-          InputDialog dialog = new InputDialog();
+          InputDialog2 dialog = new InputDialog2();
           dialog.setVisible(true);
 
-        } catch (Exception e)
+        }
+        catch (Exception e)
         {
           e.printStackTrace();
         }
@@ -138,7 +139,7 @@ public class InputDialog extends JDialog
     JPanel fastaFileField = new JPanel();
 
     fastaFileField.setLayout(new FlowLayout(FlowLayout.LEADING));
-    
+
     fastaFileField.add(new JLabel(text));
     fastaFileField.add(fileField);
     fastaFileField.add(prepareBrowseButton(fileField));
@@ -162,7 +163,7 @@ public class InputDialog extends JDialog
       public void actionPerformed(ActionEvent e)
       {
         JFileChooser chooser = new JFileChooser();
-        chooser.setFileSelectionMode(JFileChooser.FILES_AND_DIRECTORIES);  
+        chooser.setFileSelectionMode(JFileChooser.FILES_AND_DIRECTORIES);
         int returnVal = chooser.showOpenDialog(chooser);
 
         if (returnVal == JFileChooser.CANCEL_OPTION)
@@ -313,82 +314,98 @@ public class InputDialog extends JDialog
 
           ArrayList<String> fastaList = new ArrayList<String>();
           ArrayList<String> gffList = new ArrayList<String>();
-          
 
-          //Check if Both fasta and gff inputs are directories
-          if(fastaDir.isDirectory() && gffDir.isDirectory())
+          // Check if Both fasta and gff inputs are directories
+          if (fastaDir.isDirectory() && gffDir.isDirectory())
           {
             File[] fileList = fastaDir.listFiles();
-            for(int i = 0; i < fileList.length; i++)
-            {//Add only .fna file names to listi
-              System.out.println(fileList[i].getName());
-              if(fileList[i].getName().endsWith(".fna"))
+            for (int i = 0; i < fileList.length; i++)
+            {// Add only .fna file names to listi
+             // System.out.println(fileList[i].getName());
+              if (fileList[i].getName().endsWith(".fna"))
               {
                 numFiles++;
-                if(fileSubbed == null)
+                if (fileSubbed == null)
                 {
                   fileSubbed = fileList[i].getName();
-                  fileSubbed = fileSubbed.substring(0, fileSubbed.length() -6);
+                  fileSubbed = fileSubbed.substring(0, fileSubbed.length() - 6);
                   int endChar = fileSubbed.charAt(fileSubbed.length() - 1);
-                  while(endChar > '0' && endChar < '9') 
+                  while (endChar > '0' && endChar < '9')
                   {
-                    fileSubbed = fileSubbed.substring(0, fileSubbed.length()-1);
+                    fileSubbed = fileSubbed.substring(0,
+                        fileSubbed.length() - 1);
                     endChar = fileSubbed.charAt(fileSubbed.length() - 1);
                   }
-                  //System.out.println(fileSubbed);
+                  // System.out.println(fileSubbed);
                 }
               }
-                fastaList.add(fileList[i].getName());
+              fastaList.add(fileList[i].getName());
             }
           }
           else
           {
             JOptionPane.showMessageDialog(null, "Select only Directories",
-              "Invalid File", JOptionPane.ERROR_MESSAGE);
+                "Invalid File", JOptionPane.ERROR_MESSAGE);
             return;
           }
           mDisplayArea.setText("");
           System.out.println(numFiles);
           ArrayList<Integer> fileIndices = new ArrayList<Integer>();
-          for(int i = 1; i <= numFiles; i++)
+          for (int i = 1; i <= numFiles; i++)
           {
-            String fastaPath = fastaDir.getPath() +'/' + fileSubbed + i + ".0.fna";
-            String gffPath = gffDir.getPath() + '/'+ fileSubbed + i + ".0.gff";
-            //System.out.println(numFiles + " " + fastaPath);
-            if(! new File(fastaPath).exists())
+            String fastaPath = fastaDir.getPath() + '/' + fileSubbed + i
+                + ".0.fna";
+            String gffPath = gffDir.getPath() + '/' + fileSubbed + i + ".0.gff";
+            // System.out.println(numFiles + " " + fastaPath);
+            if (!new File(fastaPath).exists())
             {
-              //System.out.println("Missing " + numFiles);
+              // System.out.println("Missing " + numFiles);
               numFiles++;
               continue;
             }
-            //TODO TODO TODO!
+            // TODO TODO TODO!
             else
             {
-               fileIndices.add(i):
+              fileIndices.add(i);
             }
-            //mDisplayArea.append(fastaPath + "\n");            
+            // System.out.println("out");
+
+            // mDisplayArea.append(fastaPath + "\n");
           }
+          // System.out.println("out2");
+
           int j = 0;
           int k;
           Driver d = new Driver();
-          String workingpath;
-          for(k = 1; k < fileIndices.size(); k++) {
-            if(k == 1)
+          ArrayList<String> output = new ArrayList<String>();
+          StringBuilder conflicts = new StringBuilder();
+          String workingpath = new String();
+          for (k = 1; k < fileIndices.size(); k++)
+          {
+            // System.out.println(workingpath);
+            if (k == 1)
             {
-               workingpath = d.drive(fastaDir.getPath() + '/' + fileSubbed + fileIndices.get(0) + ".0.fna",
-                       gffDir.getPath() + '/' + fileSubbed + fileIndeices.get(0) + ".0.gff",
-                       fastaDir.getPath() + '/' + fileSubbed + fileIndices.get(1) + ".0.fna",
-                       gffDir.getPath() + '/' + fileSubbed + fileIndeices.get(1) + ".0.gff");
+              // System.out.println("out3");
+              output = d.drive(fastaDir.getPath() + '/' + fileSubbed
+                  + fileIndices.get(0) + ".0.fna", gffDir.getPath() + '/'
+                  + fileSubbed + fileIndices.get(0) + ".0.gff",
+                  fastaDir.getPath() + '/' + fileSubbed + fileIndices.get(1)
+                      + ".0.fna", gffDir.getPath() + '/' + fileSubbed
+                      + fileIndices.get(1) + ".0.gff");
 
             }
             else
             {
-               workingpath = d.drive(workingpath + ".0.fna",
-                                     workingpath + ".0.gff",
-                                     fastaDir.getPath() + '/' + fileSubbed + fileIndices.get(k) + ".0.fna",
-                                     fastaDir.getPath() + '/' + fileSubbed + fileIndices.get(k) + ".0.gff");
+              output = d.drive(workingpath + ".fna", workingpath + ".gff",
+                  fastaDir.getPath() + '/' + fileSubbed + fileIndices.get(k)
+                      + ".0.fna", gffDir.getPath() + '/' + fileSubbed
+                      + fileIndices.get(k) + ".0.gff");
+
             }
-          } 
+            workingpath = output.get(0);
+            conflicts.append(output.get(1));
+          }
+          mDisplayArea.setText(conflicts.toString());
         }
       }
     });
@@ -426,7 +443,8 @@ public class InputDialog extends JDialog
               FileWriter writer = new FileWriter(chooser.getSelectedFile());
               writer.write(mDisplayArea.getText());
               writer.close();
-            } catch (java.io.IOException ioErr)
+            }
+            catch (java.io.IOException ioErr)
             {
               JOptionPane.showMessageDialog(null,
                   "Encountered unknown error when saving output",
