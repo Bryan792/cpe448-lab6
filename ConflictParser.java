@@ -22,8 +22,9 @@ public class ConflictParser
         continue;
       if(line.charAt(0) == '/')
       {
+        returnStrings.add("PATH");
         returnStrings.add(line);
-        //System.out.print("Start: ");
+        System.out.print("Start: ");
       }
       else
       {
@@ -31,14 +32,14 @@ public class ConflictParser
         {
           case(0):
             Aname = line;
-        //System.out.print("Aname: ");
+       // System.out.print("Aname: ");
             break;
           case(1):
             A = line;
             break;
           case(2):
             Bname = line;
-        //System.out.print("Bname: ");
+      //  System.out.print("Bname: ");
             break;
           case(3):
             B = line;
@@ -46,6 +47,7 @@ public class ConflictParser
           case(4):
             reference = line;
             returnStrings.add(resolve(Aname,A,Bname,B,reference));
+      //  System.out.print("Bname: ");
             steps = -1;
             break;
           default:
@@ -53,7 +55,7 @@ public class ConflictParser
         }
         steps++;
       }
-      //System.out.println(line);
+    //  System.out.println(line);
     }
     return returnStrings;
   }

@@ -289,6 +289,7 @@ public class InputDialog2 extends JDialog
 
     resolveButton.addActionListener(new ActionListener()
     {
+
         public void actionPerformed(ActionEvent e)
         {
           if(firstPass == true)
@@ -300,7 +301,11 @@ public class InputDialog2 extends JDialog
           String[] lines = mDisplayArea.getText().split(System.getProperty("line.separator"));
           lines = Arrays.copyOfRange(lines, 2, lines.length);
           ArrayList<String> parsedConflicts = ConflictParser.parse(lines);
-          mDisplayArea.setText(parsedConflicts.toString());
+          mDisplayArea.setText("");
+          for(String s: parsedConflicts)
+          {
+            mDisplayArea.append(s + '\n');
+          }
         }
     });
     return resolveButton;
