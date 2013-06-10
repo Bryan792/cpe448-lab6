@@ -1,0 +1,14 @@
+Matt Crussell
+Bryan Ching
+Andrew Nguyen
+
+To Compile: javac *.java
+To Run: java InputDialog2
+
+Steps for use:
+
+Load gff and fasta folders
+Click "Run"
+Fill in "Reference Sequence" for each conflict in the output box
+Click "Resolve"
+Outputs correct contig and gff files to current directory
